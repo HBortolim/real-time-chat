@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Chat</title>
+    <!-- SockJS and STOMP client libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #chat-container {
+            border: 1px solid #ccc;
+            height: 400px;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        #message-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 8px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .system {
+            background-color: #ffffcc;
+            font-style: italic;
+        }
+
+        .user-message {
+            background-color: #e6f7ff;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #888;
+            margin-left: 10px;
+        }
+
+        #username-container {
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Real-time Chat</h1>
+
+<!-- Username input -->
+<div id="username-container">
+    <h3>Enter your username to join the chat</h3>
+    <form id="username-form">
+        <input type="text" id="username-input" placeholder="Your username" required>
+        <button type="submit">Join Chat</button>
+    </form>
+</div>
+
+<!-- Chat area (initially hidden) -->
+<div id="chat-area" class="hidden">
+    <div id="chat-container"></div>
+    <form id="message-form">
+        <input type="text" id="message-input" placeholder="Type your message here..." required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameContainer = document.getElementById('username-container');
+        const chatArea = document.getElementById('chat-area');
+        const usernameForm = document.getElementById('username-form');
+        const usernameInput = document.getElementById('username-input');
+        const chatContainer = document.getElementById('chat-container');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+
+        let username = '';
+        let stompClient = null;
+
+        // Handle username submission
+        usernameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            username = usernameInput.value.trim();
+            if (username) {
+                // Hide username form, show chat
+                usernameContainer.classList.add('hidden');
+                chatArea.classList.remove('hidden');
+
+                // Connect to STOMP
+                connectToChat();
+            }
+        });
+
+        // Connect to the STOMP server
+        function connectToChat() {
+            // Create SockJS connection
+            const socket = new SockJS('/ws');
+
+            // Create STOMP client over SockJS
+            stompClient = Stomp.over(socket);
+
+            // Disable debug logging
+            stompClient.debug = null;
+
+            // Connect to the server
+            stompClient.connect({}, onConnected, onError);
+        }
+
+        // On successful connection
+        function onConnected() {
+            console.log('Connected to STOMP server');
+
+            // Subscribe to the public topic
+            stompClient.subscribe('/topic/public', onMessageReceived);
+
+            // Send JOIN message
+            sendMessage({
+                type: 'JOIN',
+                sender: username,
+                content: username + ' has joined the chat',
+                timestamp: new Date().toISOString()
+            });
+
+            // Show local join message
+            addMessage({
+                type: 'JOIN',
+                sender: 'System',
+                content: 'You have joined the chat',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // On connection error
+        function onError(error) {
+            console.error('STOMP connection error:', error);
+            addMessage({
+                type: 'SYSTEM',
+                sender: 'System',
+                content: 'Connection error occurred. Please refresh the page to try again.',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // Handle message submission
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = messageInput.value.trim();
+            if (content && stompClient) {
+                sendMessage({
+                    type: 'CHAT',
+                    sender: username,
+                    content: content,
+                    timestamp: new Date().toISOString()
+                });
+                messageInput.value = '';
+            }
+        });
+
+        // Send message through STOMP
+        function sendMessage(message) {
+            if (stompClient) {
+                if (message.type === 'JOIN') {
+                    stompClient.send("/app/chat.addUser", {}, JSON.stringify(message));
+                } else {
+                    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(message));
+                }
+            }
+        }
+
+        // Handle received message
+        function onMessageReceived(payload) {
+            const message = JSON.parse(payload.body);
+            addMessage(message);
+        }
+
+        // Add message to chat container
+        function addMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+
+            // Add appropriate styling based on message type
+            if (message.type === 'JOIN' || message.type === 'LEAVE') {
+                messageElement.classList.add('system');
+            } else {
+                messageElement.classList.add('user-message');
+            }
+
+            // Format timestamp
+            const timestamp = new Date(message.timestamp).toLocaleTimeString();
+
+            // Set message content
+            messageElement.innerHTML = `<strong>${message.sender}</strong>: ${message.content} <span class="timestamp">${timestamp}</span>`;
+
+            // Add message to container and scroll to bottom
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    });
+</script>
+</body>
+</html>
