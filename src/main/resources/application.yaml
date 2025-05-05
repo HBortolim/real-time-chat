@@ -2,5 +2,28 @@ spring:
   application:
     name: "Real-time Chat"
 
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chat_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # Docker Compose Configuration
+  docker:
+    compose:
+      file: docker-compose.yml
+      enabled: true
+
 server:
   port: 8080

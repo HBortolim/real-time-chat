@@ -1,6 +1,7 @@
 package com.henrique.hbortolim.controller;
 
 import com.henrique.hbortolim.model.ChatMessage;
+import com.henrique.hbortolim.service.ChatMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -11,15 +12,18 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Controller
 public class ChatController {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatMessageService chatMessageService;
 
-    public ChatController(SimpMessagingTemplate messagingTemplate) {
+    public ChatController(SimpMessagingTemplate messagingTemplate, ChatMessageService chatMessageService) {
         this.messagingTemplate = messagingTemplate;
+        this.chatMessageService = chatMessageService;
     }
 
     @MessageMapping("/chat.sendMessage")
@@ -30,8 +34,8 @@ public class ChatController {
         if (chatMessage.getTimestamp() == null) {
             chatMessage.setTimestamp(ZonedDateTime.now());
         }
-        
-        return chatMessage;
+
+        return chatMessageService.save(chatMessage);
     }
 
     @MessageMapping("/chat.addUser")
@@ -45,7 +49,23 @@ public class ChatController {
         if (chatMessage.getTimestamp() == null) {
             chatMessage.setTimestamp(ZonedDateTime.now());
         }
-        
-        return chatMessage;
+
+        ChatMessage savedMessage = chatMessageService.save(chatMessage);
+
+        sendChatHistoryToUser(chatMessage.getSender());
+
+        return savedMessage;
+    }
+
+    private void sendChatHistoryToUser(String username) {
+        logger.info("Sending chat history to user: {}", username);
+
+        List<ChatMessage> chatHistory = chatMessageService.findChatMessages();
+
+        messagingTemplate.convertAndSendToUser(
+            username,
+            "/queue/history",
+            chatHistory
+        );
     }
 }

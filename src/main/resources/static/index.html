@@ -142,6 +142,9 @@
             // Subscribe to the public topic
             stompClient.subscribe('/topic/public', onMessageReceived);
 
+            // Subscribe to personal history channel
+            stompClient.subscribe('/user/queue/history', onHistoryReceived);
+
             // Send JOIN message
             sendMessage({
                 type: 'JOIN',
@@ -157,6 +160,26 @@
                 content: 'You have joined the chat',
                 timestamp: new Date().toISOString()
             });
+        }
+
+        // Handle received chat history
+        function onHistoryReceived(payload) {
+            console.log('Received chat history');
+            const chatHistory = JSON.parse(payload.body);
+
+            // Display a history separator
+            const separatorElement = document.createElement('div');
+            separatorElement.classList.add('message', 'system');
+            separatorElement.innerHTML = '<strong>System</strong>: Previous messages';
+            chatContainer.appendChild(separatorElement);
+
+            // Add each message from history
+            chatHistory.forEach(message => {
+                addMessage(message);
+            });
+
+            // Scroll to the bottom after adding history
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         // On connection error

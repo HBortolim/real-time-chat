@@ -2,6 +2,7 @@ package com.henrique.hbortolim.event;
 
 import com.henrique.hbortolim.model.ChatMessage;
 import com.henrique.hbortolim.model.MessageType;
+import com.henrique.hbortolim.service.ChatMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -18,9 +19,11 @@ public class WebSocketEventListener {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
 
     private final SimpMessageSendingOperations messagingTemplate;
+    private final ChatMessageService chatMessageService;
 
-    public WebSocketEventListener(SimpMessageSendingOperations messagingTemplate) {
+    public WebSocketEventListener(SimpMessageSendingOperations messagingTemplate, ChatMessageService chatMessageService) {
         this.messagingTemplate = messagingTemplate;
+        this.chatMessageService = chatMessageService;
     }
 
     @EventListener
@@ -36,6 +39,8 @@ public class WebSocketEventListener {
             chatMessage.setSender(username);
             chatMessage.setContent(username + " has left the chat");
             chatMessage.setTimestamp(ZonedDateTime.now());
+
+            chatMessage = chatMessageService.save(chatMessage);
 
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         }
