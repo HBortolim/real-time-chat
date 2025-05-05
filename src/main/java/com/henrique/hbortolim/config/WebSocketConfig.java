@@ -12,8 +12,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Enable a simple memory-based message broker to send messages to clients
-        // on destinations prefixed with /topic
         registry.enableSimpleBroker("/topic");
 
         // Set prefix for messages bound for @MessageMapping methods
