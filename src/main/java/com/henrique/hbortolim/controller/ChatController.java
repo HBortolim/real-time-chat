@@ -1,6 +1,6 @@
 package com.henrique.hbortolim.controller;
 
-import com.henrique.hbortolim.model.ChatMessage;
+import com.henrique.hbortolim.dto.ChatMessageDto;
 import com.henrique.hbortolim.service.ChatMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class ChatController {
 
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
+    public ChatMessageDto sendMessage(@Payload ChatMessageDto chatMessage) {
         logger.info("Received message: {}", chatMessage.getContent());
 
         if (chatMessage.getTimestamp() == null) {
@@ -40,7 +40,7 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage, 
+    public ChatMessageDto addUser(@Payload ChatMessageDto chatMessage, 
                                SimpMessageHeaderAccessor headerAccessor) {
         logger.info("User {} joined the chat", chatMessage.getSender());
 
@@ -50,7 +50,7 @@ public class ChatController {
             chatMessage.setTimestamp(ZonedDateTime.now());
         }
 
-        ChatMessage savedMessage = chatMessageService.save(chatMessage);
+        ChatMessageDto savedMessage = chatMessageService.save(chatMessage);
 
         sendChatHistoryToUser(chatMessage.getSender());
 
@@ -60,7 +60,7 @@ public class ChatController {
     private void sendChatHistoryToUser(String username) {
         logger.info("Sending chat history to user: {}", username);
 
-        List<ChatMessage> chatHistory = chatMessageService.findChatMessages();
+        List<ChatMessageDto> chatHistory = chatMessageService.findChatMessages();
 
         messagingTemplate.convertAndSendToUser(
             username,

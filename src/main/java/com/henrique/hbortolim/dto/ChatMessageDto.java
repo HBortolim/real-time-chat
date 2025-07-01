@@ -1,36 +1,34 @@
-package com.henrique.hbortolim.model;
+package com.henrique.hbortolim.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.henrique.hbortolim.enums.MessageType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.ZonedDateTime;
 
-@Entity
-@Table(name = "chat_messages")
-public class ChatMessage {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ChatMessageDto {
     private Long id;
-
-    @Enumerated(EnumType.STRING)
     private MessageType type;
-
     private String sender;
     private String content;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private ZonedDateTime timestamp;
 
-    public ChatMessage() {
+    public ChatMessageDto() {
     }
 
-    public ChatMessage(MessageType type, String sender, String content, ZonedDateTime timestamp) {
+    public ChatMessageDto(MessageType type, String sender, String content, ZonedDateTime timestamp) {
         this.type = type;
         this.sender = sender;
         this.content = content;
         this.timestamp = timestamp;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public MessageType getType() {
@@ -64,12 +62,4 @@ public class ChatMessage {
     public void setTimestamp(ZonedDateTime timestamp) {
         this.timestamp = timestamp;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-}
+} 

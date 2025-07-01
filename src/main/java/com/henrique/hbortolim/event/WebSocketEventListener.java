@@ -1,7 +1,7 @@
 package com.henrique.hbortolim.event;
 
-import com.henrique.hbortolim.model.ChatMessage;
-import com.henrique.hbortolim.model.MessageType;
+import com.henrique.hbortolim.dto.ChatMessageDto;
+import com.henrique.hbortolim.enums.MessageType;
 import com.henrique.hbortolim.service.ChatMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ public class WebSocketEventListener {
         if (username != null) {
             logger.info("User Disconnected: {}", username);
 
-            ChatMessage chatMessage = new ChatMessage();
+            ChatMessageDto chatMessage = new ChatMessageDto();
             chatMessage.setType(MessageType.LEAVE);
             chatMessage.setSender(username);
             chatMessage.setContent(username + " has left the chat");
