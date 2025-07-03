@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: "Real-time Chat (Development)"
+
+  # Database Configuration (can be overridden by environment variables)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chat_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # JPA Configuration with more verbose logging for development
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        generate_statistics: true
+
+  # Development-specific settings
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+  # Docker Compose Configuration (enabled for automatic service management)
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.dev.yml  # Use dev-specific compose file (PostgreSQL only)
+      skip:
+        in-tests: false
+      lifecycle-management: start-only
+
+server:
+  port: 8080
+
+# JWT Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:myVerySecretKeyThatShouldBeAtLeast32CharactersLongForHS256Algorithm}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+
+# Logging Configuration for Development
+logging:
+  level:
+    com.henrique.hbortolim: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.websocket: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator Configuration for Development
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  server:
+    port: 8081 

@@ -8,6 +8,9 @@ import com.henrique.hbortolim.entity.UserEntity;
 import com.henrique.hbortolim.mapper.UserMapper;
 import com.henrique.hbortolim.repository.UserRepository;
 import com.henrique.hbortolim.security.JwtUtils;
+
+import jakarta.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,6 +63,7 @@ public class AuthService {
         return new AuthResponseDto(jwt, userDto);
     }
 
+    @Transactional
     public AuthResponseDto register(RegisterRequestDto registerRequest) {
         logger.info("Attempting registration for email: {}", registerRequest.getEmail());
 

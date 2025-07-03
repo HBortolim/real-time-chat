@@ -6,6 +6,7 @@ target/
 .mvn/
 .DS_Store
 .java-version
+.env
 
 ### STS ###
 .apt_generated
