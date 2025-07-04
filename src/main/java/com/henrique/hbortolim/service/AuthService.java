@@ -9,7 +9,7 @@ import com.henrique.hbortolim.mapper.UserMapper;
 import com.henrique.hbortolim.repository.UserRepository;
 import com.henrique.hbortolim.security.JwtUtils;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
