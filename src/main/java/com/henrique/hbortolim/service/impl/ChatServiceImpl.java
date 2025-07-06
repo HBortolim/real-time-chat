@@ -30,6 +30,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatDto> getNonArchivedChatsByUserId(Long userId) {
         logger.info("Getting chats for user ID: {}", userId);
         List<ChatEntity> chats = chatRepository.findByUserIdAndIsArchivedFalseOrderByCreatedAtDesc(userId);
@@ -37,6 +38,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatDto> getAllChatsByUserId(Long userId) {
         logger.info("Getting all chats (including archived) for user ID: {}", userId);
         List<ChatEntity> chats = chatRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -44,6 +46,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatDto> getArchivedChatsByUserId(Long userId) {
         logger.info("Getting archived chats for user ID: {}", userId);
         List<ChatEntity> chats = chatRepository.findByUserIdAndIsArchivedTrueOrderByCreatedAtDesc(userId);
@@ -51,6 +54,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ChatDto getChatById(Long chatId, Long userId) {
         logger.info("Getting chat ID: {} for user ID: {}", chatId, userId);
         ChatEntity chat = chatRepository.findByUserIdAndId(userId, chatId)
@@ -131,6 +135,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public long getChatCountByUserId(Long userId) {
         return chatRepository.countByUserIdAndIsArchivedFalse(userId);
     }

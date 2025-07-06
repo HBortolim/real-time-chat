@@ -44,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthResponseDto login(LoginRequestDto loginRequest) {
         logger.info("Attempting login for email: {}", loginRequest.getEmail());
 

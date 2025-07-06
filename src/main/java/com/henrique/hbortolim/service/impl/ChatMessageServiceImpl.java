@@ -9,6 +9,7 @@ import com.henrique.hbortolim.service.ChatMessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     @Override
+    @Transactional
     public ChatMessageDto save(ChatMessageDto chatMessageDto) {
         logger.info("Saving chat message: {}", chatMessageDto.getContent());
         
@@ -36,18 +38,21 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatMessageDto> findAll() {
         List<ChatMessageEntity> entities = chatMessageRepository.findAllByOrderByTimestampAsc();
         return chatMessageMapper.toDtoList(entities);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatMessageDto> findByType(MessageType type) {
         List<ChatMessageEntity> entities = chatMessageRepository.findByTypeOrderByTimestampAsc(type);
         return chatMessageMapper.toDtoList(entities);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChatMessageDto> findChatMessages() {
         return findByType(MessageType.CHAT);
     }
