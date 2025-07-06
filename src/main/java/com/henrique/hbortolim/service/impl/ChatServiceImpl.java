@@ -1,8 +1,11 @@
 package com.henrique.hbortolim.service.impl;
 
-import com.henrique.hbortolim.dto.ChatDto;
+import com.henrique.hbortolim.constants.ApiConstants;
+import com.henrique.hbortolim.dto.chat.ChatDto;
 import com.henrique.hbortolim.entity.ChatEntity;
 import com.henrique.hbortolim.entity.UserEntity;
+import com.henrique.hbortolim.exception.chat.ChatNotFoundException;
+import com.henrique.hbortolim.exception.common.ResourceNotFoundException;
 import com.henrique.hbortolim.mapper.ChatMapper;
 import com.henrique.hbortolim.repository.ChatRepository;
 import com.henrique.hbortolim.repository.UserRepository;
@@ -58,7 +61,7 @@ public class ChatServiceImpl implements ChatService {
     public ChatDto getChatById(Long chatId, Long userId) {
         logger.info("Getting chat ID: {} for user ID: {}", chatId, userId);
         ChatEntity chat = chatRepository.findByUserIdAndId(userId, chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found or does not belong to user"));
+                .orElseThrow(() -> new ChatNotFoundException(chatId));
         return chatMapper.toDto(chat);
     }
 
@@ -68,7 +71,7 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Creating new chat for user ID: {}", userId);
 
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         ChatEntity chatEntity = chatMapper.toEntity(chatDto, user);
         ChatEntity savedChat = chatRepository.save(chatEntity);
@@ -83,7 +86,7 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Updating chat ID: {} for user ID: {}", chatId, userId);
 
         ChatEntity existingChat = chatRepository.findByUserIdAndId(userId, chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found or does not belong to user"));
+                .orElseThrow(() -> new ChatNotFoundException(chatId));
 
         chatMapper.updateEntityFromDto(chatDto, existingChat);
         ChatEntity updatedChat = chatRepository.save(existingChat);
@@ -98,7 +101,7 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Deleting chat ID: {} for user ID: {}", chatId, userId);
 
         ChatEntity chat = chatRepository.findByUserIdAndId(userId, chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found or does not belong to user"));
+                .orElseThrow(() -> new ChatNotFoundException(chatId));
 
         chatRepository.delete(chat);
         logger.info("Chat deleted with ID: {}", chatId);
@@ -110,7 +113,7 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Archiving chat ID: {} for user ID: {}", chatId, userId);
 
         ChatEntity chat = chatRepository.findByUserIdAndId(userId, chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found or does not belong to user"));
+                .orElseThrow(() -> new ChatNotFoundException(chatId));
 
         chat.setIsArchived(true);
         ChatEntity archivedChat = chatRepository.save(chat);
@@ -125,7 +128,7 @@ public class ChatServiceImpl implements ChatService {
         logger.info("Unarchiving chat ID: {} for user ID: {}", chatId, userId);
 
         ChatEntity chat = chatRepository.findByUserIdAndId(userId, chatId)
-                .orElseThrow(() -> new RuntimeException("Chat not found or does not belong to user"));
+                .orElseThrow(() -> new ChatNotFoundException(chatId));
 
         chat.setIsArchived(false);
         ChatEntity unarchivedChat = chatRepository.save(chat);

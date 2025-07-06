@@ -1,6 +1,6 @@
 package com.henrique.hbortolim.service;
 
-import com.henrique.hbortolim.dto.ChatMessageDto;
+import com.henrique.hbortolim.dto.chat.ChatMessageDto;
 import com.henrique.hbortolim.entity.ChatMessageEntity;
 import com.henrique.hbortolim.enums.MessageType;
 import com.henrique.hbortolim.mapper.ChatMessageMapper;

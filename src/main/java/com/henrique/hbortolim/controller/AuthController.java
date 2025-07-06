@@ -1,22 +1,22 @@
 package com.henrique.hbortolim.controller;
 
+import com.henrique.hbortolim.constants.ApiConstants;
 import com.henrique.hbortolim.dto.auth.AuthResponseDto;
 import com.henrique.hbortolim.dto.auth.LoginRequestDto;
 import com.henrique.hbortolim.dto.auth.RegisterRequestDto;
+import com.henrique.hbortolim.dto.common.ApiResponseDto;
 import com.henrique.hbortolim.service.AuthService;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(ApiConstants.Endpoints.AUTH_PREFIX)
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -27,43 +27,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequest) {
-        try {
-            AuthResponseDto response = authService.login(loginRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Login failed for email: {}", loginRequest.getEmail(), e);
-            return ResponseEntity.badRequest()
-                .body(new MessageResponse("Error: Invalid email or password!"));
-        }
+    public ResponseEntity<ApiResponseDto<AuthResponseDto>> login(@RequestBody LoginRequestDto loginRequest) {
+        logger.info("Login request received for email: {}", loginRequest.getEmail());
+        AuthResponseDto authResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(ApiResponseDto.success("Login successful", authResponse));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequestDto registerRequest) {
-        try {
-            AuthResponseDto response = authService.register(registerRequest);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Registration failed for email: {}", registerRequest.getEmail(), e);
-            return ResponseEntity.badRequest()
-                .body(new MessageResponse("Error: " + e.getMessage()));
-        }
-    }
-
-    // Helper class for error responses
-    public static class MessageResponse {
-        private String message;
-
-        public MessageResponse(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
+    public ResponseEntity<ApiResponseDto<AuthResponseDto>> register(@RequestBody RegisterRequestDto registerRequest) {
+        logger.info("Registration request received for email: {}", registerRequest.getEmail());
+        AuthResponseDto authResponse = authService.register(registerRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponseDto.success("Registration successful", authResponse));
     }
 } 

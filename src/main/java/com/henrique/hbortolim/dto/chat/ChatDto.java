@@ -1,4 +1,4 @@
-package com.henrique.hbortolim.dto;
+package com.henrique.hbortolim.dto.chat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.ZonedDateTime;

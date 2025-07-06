@@ -1,6 +1,6 @@
 package com.henrique.hbortolim.service;
 
-import com.henrique.hbortolim.dto.ChatDto;
+import com.henrique.hbortolim.dto.chat.ChatDto;
 import com.henrique.hbortolim.entity.ChatEntity;
 import com.henrique.hbortolim.entity.UserEntity;
 import com.henrique.hbortolim.mapper.ChatMapper;

@@ -1,4 +1,4 @@
-package com.henrique.hbortolim.dto;
+package com.henrique.hbortolim.dto.chat;
 
 import com.henrique.hbortolim.enums.MessageType;
 import com.fasterxml.jackson.annotation.JsonFormat;

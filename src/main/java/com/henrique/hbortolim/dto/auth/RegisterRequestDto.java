@@ -1,5 +1,7 @@
 package com.henrique.hbortolim.dto.auth;
 
+import com.henrique.hbortolim.validation.annotation.ValidPassword;
+import com.henrique.hbortolim.validation.annotation.ValidUsername;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,11 +13,11 @@ public class RegisterRequestDto {
     private String email;
     
     @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
+    @ValidPassword(requireUpperCase = true, requireLowerCase = true, requireDigit = true)
     private String password;
     
     @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @ValidUsername
     private String username;
     
     @Size(max = 100, message = "Display name must not exceed 100 characters")

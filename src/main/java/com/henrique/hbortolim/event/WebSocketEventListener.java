@@ -1,6 +1,6 @@
 package com.henrique.hbortolim.event;
 
-import com.henrique.hbortolim.dto.ChatMessageDto;
+import com.henrique.hbortolim.dto.chat.ChatMessageDto;
 import com.henrique.hbortolim.enums.MessageType;
 import com.henrique.hbortolim.service.ChatMessageService;
 import org.slf4j.Logger;

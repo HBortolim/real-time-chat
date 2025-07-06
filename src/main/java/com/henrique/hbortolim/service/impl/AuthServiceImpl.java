@@ -1,14 +1,18 @@
 package com.henrique.hbortolim.service.impl;
 
+import com.henrique.hbortolim.constants.ApiConstants;
 import com.henrique.hbortolim.dto.UserDto;
 import com.henrique.hbortolim.dto.auth.AuthResponseDto;
 import com.henrique.hbortolim.dto.auth.LoginRequestDto;
 import com.henrique.hbortolim.dto.auth.RegisterRequestDto;
 import com.henrique.hbortolim.entity.UserEntity;
+import com.henrique.hbortolim.exception.auth.UserAlreadyExistsException;
+import com.henrique.hbortolim.exception.common.ResourceNotFoundException;
 import com.henrique.hbortolim.mapper.UserMapper;
 import com.henrique.hbortolim.repository.UserRepository;
 import com.henrique.hbortolim.security.JwtUtils;
 import com.henrique.hbortolim.service.AuthService;
+import com.henrique.hbortolim.util.ValidationUtils;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserEntity userEntity = userRepository.findByEmail(loginRequest.getEmail())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "email", loginRequest.getEmail()));
 
         UserDto userDto = userMapper.toDto(userEntity);
 
@@ -71,12 +75,14 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponseDto register(RegisterRequestDto registerRequest) {
         logger.info("Attempting registration for email: {}", registerRequest.getEmail());
 
+        validateRegistrationRequest(registerRequest);
+
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Email is already taken!");
+            throw new UserAlreadyExistsException("email", registerRequest.getEmail());
         }
 
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("Username is already taken!");
+            throw new UserAlreadyExistsException("username", registerRequest.getUsername());
         }
 
         UserEntity user = new UserEntity();
@@ -96,5 +102,21 @@ public class AuthServiceImpl implements AuthService {
 
         logger.info("Registration successful for email: {}", registerRequest.getEmail());
         return new AuthResponseDto(jwt, userDto);
+    }
+
+    private void validateRegistrationRequest(RegisterRequestDto request) {
+        if (!ValidationUtils.isValidEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        
+        if (!ValidationUtils.isValidUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Invalid username format");
+        }
+        
+        if (!ValidationUtils.isValidPassword(request.getPassword())) {
+            throw new IllegalArgumentException("Password must be between " + 
+                ApiConstants.Validation.MIN_PASSWORD_LENGTH + " and " + 
+                ApiConstants.Validation.MAX_PASSWORD_LENGTH + " characters");
+        }
     }
 } 

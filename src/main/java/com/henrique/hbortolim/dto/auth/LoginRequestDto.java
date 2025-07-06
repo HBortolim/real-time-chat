@@ -1,8 +1,8 @@
 package com.henrique.hbortolim.dto.auth;
 
+import com.henrique.hbortolim.validation.annotation.ValidPassword;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public class LoginRequestDto {
     
@@ -11,7 +11,7 @@ public class LoginRequestDto {
     private String email;
     
     @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
+    @ValidPassword
     private String password;
 
     public LoginRequestDto() {}
