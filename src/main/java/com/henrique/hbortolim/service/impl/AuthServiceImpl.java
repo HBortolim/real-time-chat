@@ -1,6 +1,6 @@
 package com.henrique.hbortolim.service.impl;
 
-import com.henrique.hbortolim.constants.ApiConstants;
+
 import com.henrique.hbortolim.dto.UserDto;
 import com.henrique.hbortolim.dto.auth.AuthResponseDto;
 import com.henrique.hbortolim.dto.auth.LoginRequestDto;
@@ -12,7 +12,7 @@ import com.henrique.hbortolim.mapper.UserMapper;
 import com.henrique.hbortolim.repository.UserRepository;
 import com.henrique.hbortolim.security.JwtUtils;
 import com.henrique.hbortolim.service.AuthService;
-import com.henrique.hbortolim.util.ValidationUtils;
+
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,8 +75,6 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponseDto register(RegisterRequestDto registerRequest) {
         logger.info("Attempting registration for email: {}", registerRequest.getEmail());
 
-        validateRegistrationRequest(registerRequest);
-
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new UserAlreadyExistsException("email", registerRequest.getEmail());
         }
@@ -104,19 +102,5 @@ public class AuthServiceImpl implements AuthService {
         return new AuthResponseDto(jwt, userDto);
     }
 
-    private void validateRegistrationRequest(RegisterRequestDto request) {
-        if (!ValidationUtils.isValidEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Invalid email format");
-        }
-        
-        if (!ValidationUtils.isValidUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Invalid username format");
-        }
-        
-        if (!ValidationUtils.isValidPassword(request.getPassword())) {
-            throw new IllegalArgumentException("Password must be between " + 
-                ApiConstants.Validation.MIN_PASSWORD_LENGTH + " and " + 
-                ApiConstants.Validation.MAX_PASSWORD_LENGTH + " characters");
-        }
-    }
+
 } 
