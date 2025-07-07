@@ -8,9 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.validation.FieldError;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,6 +44,24 @@ public class GlobalExceptionHandler {
         logger.error("User already exists: {}", ex.getMessage());
         ApiResponseDto<Object> response = ApiResponseDto.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponseDto<Object>> handleValidationException(
+            MethodArgumentNotValidException ex, WebRequest request) {
+        logger.warn("Validation failed for request: {}", request.getDescription(false));
+        
+        List<String> errorMessages = new ArrayList<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errorMessages.add(fieldError.getDefaultMessage());
+        }
+        
+        String message = errorMessages.size() == 1 ? 
+            errorMessages.get(0) : 
+            "Validation failed: " + String.join(", ", errorMessages);
+            
+        ApiResponseDto<Object> response = ApiResponseDto.error(message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     
     @ExceptionHandler(RuntimeException.class)
