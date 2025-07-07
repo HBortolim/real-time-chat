@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(ApiConstants.Endpoints.AUTH_PREFIX)
@@ -27,14 +28,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponseDto<AuthResponseDto>> login(@RequestBody LoginRequestDto loginRequest) {
+    public ResponseEntity<ApiResponseDto<AuthResponseDto>> login(@Valid @RequestBody LoginRequestDto loginRequest) {
         logger.info("Login request received for email: {}", loginRequest.getEmail());
         AuthResponseDto authResponse = authService.login(loginRequest);
         return ResponseEntity.ok(ApiResponseDto.success("Login successful", authResponse));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponseDto<AuthResponseDto>> register(@RequestBody RegisterRequestDto registerRequest) {
+    public ResponseEntity<ApiResponseDto<AuthResponseDto>> register(@Valid @RequestBody RegisterRequestDto registerRequest) {
         logger.info("Registration request received for email: {}", registerRequest.getEmail());
         AuthResponseDto authResponse = authService.register(registerRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
